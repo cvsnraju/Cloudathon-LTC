@@ -3,6 +3,13 @@ Lloyds Technology Centre - Cloudathon 2025
 
 ## Idea
 
+2 Stages
+
+*  Migration strategy from Terraform to Opentofu
+*  Manage multi environment configuration using Opentofu 
+
+Background
+
 1. OpenTofu: This is a tool that helps automate the setup of infrastructure. Think of it as a way to quickly and consistently set up the computer systems you need.
 2. Templates: These are predefined blueprints that describe how your infrastructure should be set up.
 Using templates ensures that every setup is consistent and follows the same rules.
