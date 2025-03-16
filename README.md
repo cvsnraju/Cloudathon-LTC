@@ -3,6 +3,13 @@ Lloyds Technology Centre - Cloudathon 2025
 
 ## Idea
 
+2 Stages
+
+*  Migration strategy from Terraform to Opentofu
+*  Manage multi environment configuration using Opentofu 
+
+Background
+
 1. OpenTofu: This is a tool that helps automate the setup of infrastructure. Think of it as a way to quickly and consistently set up the computer systems you need.
 2. Templates: These are predefined blueprints that describe how your infrastructure should be set up.
 Using templates ensures that every setup is consistent and follows the same rules.
@@ -18,10 +25,11 @@ Does this explanation help clarify your idea? If you have any more questions or 
 ## Team @
 
 | Name | CID | Email | Contact |
-| Ankit Sachdeva | 560776 | ankit.sachdeva@lloydsbanking.co | +919780687117 |
+| -------- | ------- | -------- | ------- |
+| Ankit Sachdeva | 5607766 | ankit.sachdeva@lloydsbanking.com | +919780687117 |
 | Padmakiran Vajjala | 5607623 | padmakiran.vajjala@lloydsbanking.com | +918106039843 |
 | Tarunkumar Giduturi | 5612039 | tarunkumar.giduturi@lloydsbanking.com | +917013390766 |
-| Venkata Chiluvuri | 5606974 | venkata-satyanarayana-raju.chiluvuri@lloydsbanking.com | 919705851949 |
+| Venkata Chiluvuri | 5605974 | venkata-satyanarayana-raju.chiluvuri@lloydsbanking.com | 919705851949 |
 
 
 ## Build
