@@ -1,4 +1,4 @@
-isteps:
+steps:
   # Define Environment Variables and Terraform Initialization Step
   - name: 'hashicorp/terraform:latest'
     dir: 'terraform-provision-gke-cluster'
