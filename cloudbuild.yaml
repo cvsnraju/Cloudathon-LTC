@@ -1,0 +1,26 @@
+steps:
+- name: 'hashicorp/terraform:latest'
+  dir: 'terraform-provision-gke-cluster'
+  args: ['init']
+  env:
+  - 'TF_VAR_PROJECT_ID=$PROJECT_ID'
+  - 'TF_VAR_REGION=asia-south1'
+
+- name: 'hashicorp/terraform:latest'
+  dir: 'terraform-provision-gke-cluster'
+  args: ['plan']
+  env:
+  - 'TF_VAR_PROJECT_ID=$PROJECT_ID'
+  - 'TF_VAR_REGION=asia-south1'
+
+# Optional: If you want to apply the Terraform plan, uncomment the following step
+# - name: 'hashicorp/terraform:latest'
+#   dir: 'terraform-provision-gke-cluster'
+#   args: ['apply', '-auto-approve']
+#   env:
+#   - 'TF_VAR_PROJECT_ID=$PROJECT_ID'
+#   - 'TF_VAR_REGION=asia-south1'
+
+# Pull the OpenTofu image (optional)
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['pull', 'asia-south1-docker.pkg.dev/ltc-hack-prj-19/cloudathon/opentofu:latest']
