@@ -1,47 +1,45 @@
 steps:
-  # Define Environment Variables and Terraform Initialization Step
-  - name: 'hashicorp/terraform:latest'
-    dir: 'terraform-provision-gke-cluster'
-    env:
-      - 'TF_VAR_PROJECT_ID=$PROJECT_ID'
-      - 'TF_VAR_REGION=asia-south1'
-      - 'TF_VAR_GKE_USERNAME=""'
-      - 'TF_VAR_GKE_PASSWORD=""'
-      - 'TF_VAR_GKE_NUM_NODES=1'
-    args: ['init']
+# Install OpenTofu CLI
+- id: install-tofu
+  name: 'alpine'
+  entrypoint: sh
+  args:
+    - '-c'
+    - |
+      wget https://github.com/opentofu/opentofu/releases/download/v1.6.0/tofu_1.6.0_linux_amd64.zip &&
+      unzip tofu_1.6.0_linux_amd64.zip &&
+      mv tofu /usr/local/bin/ &&
+      chmod +x /usr/local/bin/tofu
 
-  # Terraform Plan Step
-  - name: 'hashicorp/terraform:latest'
-    dir: 'terraform-provision-gke-cluster'
-    env:
-      - 'TF_VAR_PROJECT_ID=$PROJECT_ID'
-      - 'TF_VAR_REGION=asia-south1'
-      - 'TF_VAR_GKE_USERNAME=""'
-      - 'TF_VAR_GKE_PASSWORD=""'
-      - 'TF_VAR_GKE_NUM_NODES=1'
-    args: ['plan', '-out=terraform-plan.out']
+# Initialize OpenTofu (with remote backend)
+- id: init-tofu
+  name: 'hashicorp/terraform'
+  entrypoint: 'tofu'
+  args: ['init']
 
-  # Save Terraform Plan to Logs Bucket
-  - name: 'gcr.io/cloud-builders/gsutil'
-    args:
-      - 'cp'
-      - 'terraform-provision-gke-cluster/terraform-plan.out'
-      - 'gs://ltc-hack-prj-19-cloud-build-logs/${BUILD_ID}/terraform-plan.out'
+# Apply configuration (Create clusters)
+- id: apply-tofu
+  name: 'hashicorp/terraform'
+  entrypoint: 'tofu'
+  args:
+    - 'apply'
+    - '-auto-approve'
 
-  # Optional: Apply the Terraform plan (Uncomment if you want to apply it)
-  # - name: 'hashicorp/terraform:latest'
-  #   dir: 'terraform-provision-gke-cluster'
-  #   args: ['apply', '-auto-approve', 'terraform-plan.out']
-  #   env:
-  #     - 'TF_VAR_PROJECT_ID=$PROJECT_ID'
-  #     - 'TF_VAR_REGION=asia-south1'
-  #     - 'TF_VAR_GKE_USERNAME=""'
-  #     - 'TF_VAR_GKE_PASSWORD=""'
-  #     - 'TF_VAR_GKE_NUM_NODES=1'
+# Read duration from env file and sleep for that duration (seconds)
+- id: wait-duration
+  name: 'alpine'
+  entrypoint: sh
+  args:
+    - '-c'
+    - |
+      DURATION=$(grep DURATION duration.env | cut -d '=' -f2) &&
+      echo "Sleeping for $DURATION seconds..." &&
+      sleep $DURATION
 
-logsBucket: 'gs://ltc-hack-prj-19-cloud-build-logs/${BUILD_ID}'
-
-options:
-  logging: GCS_ONLY
-
-serviceAccount: 'projects/ltc-hack-prj-19/serviceAccounts/local-resource-creator@ltc-hack-prj-19.iam.gserviceaccount.com'
+# Destroy clusters after waiting period ends
+- id: destroy-tofu
+  name: 'hashicorp/terraform'
+  entrypoint: 'tofu'
+  args:
+    - 'destroy'
+    - '-auto-approve'
