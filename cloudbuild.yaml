@@ -1,12 +1,13 @@
-# Cloud Build Configuration File
-
-steps:
+isteps:
   # Define Environment Variables and Terraform Initialization Step
   - name: 'hashicorp/terraform:latest'
     dir: 'terraform-provision-gke-cluster'
     env:
       - 'TF_VAR_PROJECT_ID=$PROJECT_ID'
       - 'TF_VAR_REGION=asia-south1'
+      - 'TF_VAR_GKE_USERNAME=""'
+      - 'TF_VAR_GKE_PASSWORD=""'
+      - 'TF_VAR_GKE_NUM_NODES=1'
     args: ['init']
 
   # Terraform Plan Step
@@ -15,6 +16,9 @@ steps:
     env:
       - 'TF_VAR_PROJECT_ID=$PROJECT_ID'
       - 'TF_VAR_REGION=asia-south1'
+      - 'TF_VAR_GKE_USERNAME=""'
+      - 'TF_VAR_GKE_PASSWORD=""'
+      - 'TF_VAR_GKE_NUM_NODES=1'
     args: ['plan', '-out=terraform-plan.out']
 
   # Save Terraform Plan to Logs Bucket
@@ -24,41 +28,6 @@ steps:
       - 'terraform-provision-gke-cluster/terraform-plan.out'
       - 'gs://ltc-hack-prj-19-cloud-build-logs/${BUILD_ID}/terraform-plan.out'
 
-  # Save Terraform State to Logs Bucket
-  - name: 'gcr.io/cloud-builders/gsutil'
-    args:
-      - 'cp'
-      - 'terraform-provision-gke-cluster/terraform.tfstate'
-      - 'gs://ltc-hack-prj-19-cloud-build-logs/${BUILD_ID}/terraform.tfstate'
-
-  # Pull OpenTofu Image (Shared Step for Both OpenTofu and Terraform)
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['pull', 'asia-south1-docker.pkg.dev/ltc-hack-prj-19/cloudathon/opentofu:latest']
-
-  # OpenTofu Initialization Step
-  - name: 'asia-south1-docker.pkg.dev/ltc-hack-prj-19/cloudathon/opentofu:latest'
-    dir: 'terraform-provision-gke-cluster'
-    args: ['init', '--upgrade']
-
-  # OpenTofu Plan Step
-  - name: 'asia-south1-docker.pkg.dev/ltc-hack-prj-19/cloudathon/opentofu:latest'
-    dir: 'terraform-provision-gke-cluster'
-    args: ['plan', '-out=opentofu-plan.out']
-
-  # Save OpenTofu Plan to Logs Bucket
-  - name: 'gcr.io/cloud-builders/gsutil'
-    args:
-      - 'cp'
-      - 'terraform-provision-gke-cluster/opentofu-plan.out'
-      - 'gs://ltc-hack-prj-19-cloud-build-logs/${BUILD_ID}/opentofu-plan.out'
-
-  # Save OpenTofu State to Logs Bucket
-  - name: 'gcr.io/cloud-builders/gsutil'
-    args:
-      - 'cp'
-      - 'terraform-provision-gke-cluster/terraform.tfstate'
-      - 'gs://ltc-hack-prj-19-cloud-build-logs/${BUILD_ID}/opentofu.tfstate'
-
   # Optional: Apply the Terraform plan (Uncomment if you want to apply it)
   # - name: 'hashicorp/terraform:latest'
   #   dir: 'terraform-provision-gke-cluster'
@@ -66,12 +35,13 @@ steps:
   #   env:
   #     - 'TF_VAR_PROJECT_ID=$PROJECT_ID'
   #     - 'TF_VAR_REGION=asia-south1'
+  #     - 'TF_VAR_GKE_USERNAME=""'
+  #     - 'TF_VAR_GKE_PASSWORD=""'
+  #     - 'TF_VAR_GKE_NUM_NODES=1'
 
-# Bucket path for logging
-logsBucket: 'gs://ltc-hack-prj-19-cloud-build-logs/${BUILD_ID}'  # New path using the unique build ID
+logsBucket: 'gs://ltc-hack-prj-19-cloud-build-logs/${BUILD_ID}'
 
 options:
   logging: GCS_ONLY
 
-# Service Account (ensure it has the necessary permissions)
 serviceAccount: 'projects/ltc-hack-prj-19/serviceAccounts/local-resource-creator@ltc-hack-prj-19.iam.gserviceaccount.com'
