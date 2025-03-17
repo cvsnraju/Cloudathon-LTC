@@ -1,26 +1,70 @@
-steps:
+# Environment Variables
+env:
+  - 'TF_VAR_PROJECT_ID=$PROJECT_ID'
+  - 'TF_VAR_REGION=asia-south1'
+
+# Terraform Initialization Step
 - name: 'hashicorp/terraform:latest'
   dir: 'terraform-provision-gke-cluster'
   args: ['init']
-  env:
-  - 'TF_VAR_PROJECT_ID=$PROJECT_ID'
-  - 'TF_VAR_REGION=asia-south1'
 
+# Terraform Plan Step
 - name: 'hashicorp/terraform:latest'
   dir: 'terraform-provision-gke-cluster'
-  args: ['plan']
-  env:
-  - 'TF_VAR_PROJECT_ID=$PROJECT_ID'
-  - 'TF_VAR_REGION=asia-south1'
+  args: ['plan', '-out=terraform-plan.out']
 
-# Optional: If you want to apply the Terraform plan, uncomment the following step
-# - name: 'hashicorp/terraform:latest'
-#   dir: 'terraform-provision-gke-cluster'
-#   args: ['apply', '-auto-approve']
-#   env:
-#   - 'TF_VAR_PROJECT_ID=$PROJECT_ID'
-#   - 'TF_VAR_REGION=asia-south1'
+# Save Terraform Plan to Logs Bucket
+- name: 'gcr.io/cloud-builders/gsutil'
+  args:
+    - 'cp'
+    - 'terraform-provision-gke-cluster/terraform-plan.out'
+    - 'gs://ltc-hack-prj-19-cloud-build-logs-${_BUILD_ID}/terraform-plan.out'
 
-# Pull the OpenTofu image (optional)
+# Save Terraform State to Logs Bucket
+- name: 'gcr.io/cloud-builders/gsutil'
+  args:
+    - 'cp'
+    - 'terraform-provision-gke-cluster/terraform.tfstate'
+    - 'gs://ltc-hack-prj-19-cloud-build-logs-${_BUILD_ID}/terraform.tfstate'
+
+# Pull OpenTofu Image (Shared Step for Both OpenTofu and Terraform)
 - name: 'gcr.io/cloud-builders/docker'
   args: ['pull', 'asia-south1-docker.pkg.dev/ltc-hack-prj-19/cloudathon/opentofu:latest']
+
+# OpenTofu Initialization Step
+- name: 'asia-south1-docker.pkg.dev/ltc-hack-prj-19/cloudathon/opentofu:latest'
+  dir: 'terraform-provision-gke-cluster'
+  args: ['init', '--upgrade']
+
+# OpenTofu Plan Step
+- name: 'asia-south1-docker.pkg.dev/ltc-hack-prj-19/cloudathon/opentofu:latest'
+  dir: 'terraform-provision-gke-cluster'
+  args: ['plan', '-out=opentofu-plan.out']
+
+# Save OpenTofu Plan to Logs Bucket
+- name: 'gcr.io/cloud-builders/gsutil'
+  args:
+    - 'cp'
+    - 'terraform-provision-gke-cluster/opentofu-plan.out'
+    - 'gs://ltc-hack-prj-19-cloud-build-logs-${_BUILD_ID}/opentofu-plan.out'
+
+# Save OpenTofu State to Logs Bucket
+- name: 'gcr.io/cloud-builders/gsutil'
+  args:
+    - 'cp'
+    - 'terraform-provision-gke-cluster/terraform.tfstate'
+    - 'gs://ltc-hack-prj-19-cloud-build-logs-${_BUILD_ID}/opentofu.tfstate'
+
+# Optional: Apply the Terraform plan (Uncomment if you want to apply it)
+# - name: 'hashicorp/terraform:latest'
+#   dir: 'terraform-provision-gke-cluster'
+#   args: ['apply', '-auto-approve', 'terraform-plan.out']
+#   env:
+#     - 'TF_VAR_PROJECT_ID=$PROJECT_ID'
+#     - 'TF_VAR_REGION=asia-south1'
+
+logsBucket: 'gs://ltc-hack-prj-19-cloud-build-logs-${_BUILD_ID}'  # New path using the unique build ID
+options:
+  logging: GCS_ONLY
+serviceAccount: 'projects/ltc-hack-prj-19/serviceAccounts/local-resource-creator@ltc-hack-prj-19.iam.gserviceaccount.com'
+i
