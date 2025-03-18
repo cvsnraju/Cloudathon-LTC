@@ -1,6 +1,6 @@
 steps:
-  # Install OpenTofu CLI
-  - id: install-tofu
+  # Install OpenTofu CLI and use it for all OpenTofu operations
+  - id: install-and-run-tofu
     name: 'alpine'
     entrypoint: sh
     args:
@@ -9,21 +9,9 @@ steps:
         apk add --no-cache wget unzip &&
         wget https://github.com/opentofu/opentofu/releases/download/v1.6.0/tofu_1.6.0_linux_amd64.zip &&
         unzip -j tofu_1.6.0_linux_amd64.zip tofu -d /usr/local/bin/ &&
-        chmod +x /usr/local/bin/tofu
-
-  # Initialize OpenTofu (with remote backend)
-  - id: init-tofu
-    name: 'hashicorp/terraform'
-    entrypoint: 'tofu'
-    args: ['init']
-
-  # Apply configuration (Create clusters)
-  - id: apply-tofu
-    name: 'hashicorp/terraform'
-    entrypoint: 'tofu'
-    args:
-      - 'apply'
-      - '-auto-approve'
+        chmod +x /usr/local/bin/tofu &&
+        tofu init &&
+        tofu apply -auto-approve
 
   # Read duration from env file and sleep for that duration (seconds)
   - id: wait-duration
@@ -38,14 +26,18 @@ steps:
 
   # Destroy clusters after waiting period ends
   - id: destroy-tofu
-    name: 'hashicorp/terraform'
-    entrypoint: 'tofu'
+    name: 'alpine'
+    entrypoint: sh
     args:
-      - 'destroy'
-      - '-auto-approve'
+      - '-c'
+      - |
+        apk add --no-cache wget unzip &&
+        wget https://github.com/opentofu/opentofu/releases/download/v1.6.0/tofu_1.6.0_linux_amd64.zip &&
+        unzip -j tofu_1.6.0_linux_amd64.zip tofu -d /usr/local/bin/ &&
+        chmod +x /usr/local/bin/tofu &&
+        tofu destroy -auto-approve
 
-# Root-level configurations
-logsBucket: 'gs://ltc-hack-prj-19-cloud-build-logs/${BUILD_ID}'  # New path using the unique build ID
+logsBucket: 'gs://ltc-hack-prj-19-cloud-build-logs/${BUILD_ID}'
 
 options:
   logging: GCS_ONLY
