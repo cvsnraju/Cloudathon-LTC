@@ -34,9 +34,14 @@ Does this explanation help clarify your idea? If you have any more questions or 
 
 ## Build
 
-Initializing the working directory using “tofu init”
-Validating the configuration using “tofu validate”
-Formatting the configuration code using “tofu fmt”
-Planning the configuration changes using “tofu plan”
-Applying the configuration changes using “tofu apply”
-Tearing down the configuration using “tofu destroy
+* Initializing the working directory using “tofu init”
+
+* Validating the configuration using “tofu validate”
+
+* Formatting the configuration code using “tofu fmt”
+
+* Planning the configuration changes using “tofu plan”
+
+* Applying the configuration changes using “tofu apply”
+
+* Tearing down the configuration using “tofu destroy
