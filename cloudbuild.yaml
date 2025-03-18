@@ -7,9 +7,9 @@ steps:
     - '-c'
     - |
       wget https://github.com/opentofu/opentofu/releases/download/v1.6.0/tofu_1.6.0_linux_amd64.zip &&
-      unzip tofu_1.6.0_linux_amd64.zip &&
-      mv tofu /usr/local/bin/ &&
+      unzip -j tofu_1.6.0_linux_amd64.zip tofu -d /usr/local/bin/ &&
       chmod +x /usr/local/bin/tofu
+
 
 # Initialize OpenTofu (with remote backend)
 - id: init-tofu
