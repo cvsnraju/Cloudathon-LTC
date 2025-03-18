@@ -1,9 +1,12 @@
 variable "project_id" {
   description = "GCP Project ID"
+  default     = "ltc-hack-prj-19"
 }
 
 variable "region" {
   description = "GCP Region"
+  default     = "asia-south1"
+
 }
 
 variable "node_count" {
