@@ -33,8 +33,8 @@ steps:
     - '-c'
     - |
       DURATION=$(grep DURATION duration.env | cut -d '=' -f2) &&
-      echo "Sleeping for $DURATION seconds..." &&
-      sleep $DURATION
+      echo "Sleeping for ${_DURATION} seconds..." &&
+      sleep ${_DURATION}
 
 # Destroy clusters after waiting period ends
 - id: destroy-tofu
@@ -52,3 +52,6 @@ options:
 
 # Service Account (ensure it has the necessary permissions)
 serviceAccount: 'projects/ltc-hack-prj-19/serviceAccounts/local-resource-creator@ltc-hack-prj-19.iam.gserviceaccount.com'
+
+substitutions:
+  _DURATION: "600" # Default value, override via trigger if needed.
