@@ -43,14 +43,13 @@
     - 'destroy'
     - '-auto-approve'
 
-# Bucket path for logging
+# Root-level configurations
 logsBucket: 'gs://ltc-hack-prj-19-cloud-build-logs/${BUILD_ID}'  # New path using the unique build ID
 
 options:
   logging: GCS_ONLY
 
-# Service Account (ensure it has the necessary permissions)
 serviceAccount: 'projects/ltc-hack-prj-19/serviceAccounts/local-resource-creator@ltc-hack-prj-19.iam.gserviceaccount.com'
 
 substitutions:
-  _DURATION: "600" # Default value, override via trigger if needed.
+  _DURATION: "600" # Default value, override via trigger if needed
